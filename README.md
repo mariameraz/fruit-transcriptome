@@ -1,6 +1,7 @@
 # fruit-transcriptome
-Differences in transcriptional dynamics between pepper and tomato during fruit development 
+##### Differences in transcriptional dynamics between pepper and tomato during fruit development 
 
+*****
 **About data:**
 The transcriptome data analyzed in this study were adquired from Sequence Read Archive (SRA) database from accesions PRJNA223222 (*Capsicum annuum cv. cm334*) and  PRJNA422262 (*Solanum lycopersicum cv. m82*), and previously published by:
 
