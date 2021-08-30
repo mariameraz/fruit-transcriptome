@@ -1,0 +1,100 @@
+	lycopersicum	pepper
+Number of genes	34075	35845
+Number of genes in orthogroups	28213	34169
+Number of unassigned genes	5862	1676
+Percentage of genes in orthogroups	82.8	95.3
+Percentage of unassigned genes	17.2	4.7
+Number of orthogroups containing species	17151	16952
+Percentage of orthogroups containing species	95.5	94.4
+Number of species-specific orthogroups	1005	806
+Number of genes in species-specific orthogroups	5088	5461
+Percentage of genes in species-specific orthogroups	14.9	15.2
+
+
+Number of genes per-species in orthogroup	Number of orthogroups	Number of orthogroups
+'0	806	1005
+'1	12625	11517
+'2	2801	2936
+'3	768	1053
+'4	354	462
+'5	198	260
+'6	104	172
+'7	67	104
+'8	52	76
+'9	29	44
+'10	17	56
+11-15	74	125
+16-20	22	55
+21-50	32	65
+51-100	4	19
+101-150	2	5
+151-200	0	1
+201-500	2	1
+501-1000	0	1
+'1001+	0	0
+
+Number of genes per-species in orthogroup	Percentage of orthogroups	Percentage of orthogroups
+'0	4.5	5.6
+'1	70.3	64.1
+'2	15.6	16.4
+'3	4.3	5.9
+'4	2.0	2.6
+'5	1.1	1.4
+'6	0.6	1.0
+'7	0.4	0.6
+'8	0.3	0.4
+'9	0.2	0.2
+'10	0.1	0.3
+11-15	0.4	0.7
+16-20	0.1	0.3
+21-50	0.2	0.4
+51-100	0.0	0.1
+101-150	0.0	0.0
+151-200	0.0	0.0
+201-500	0.0	0.0
+501-1000	0.0	0.0
+'1001+	0.0	0.0
+
+Number of genes per-species in orthogroup	Number of genes	Number of genes
+'0	0	0
+'1	12625	11517
+'2	5602	5872
+'3	2304	3159
+'4	1416	1848
+'5	990	1300
+'6	624	1032
+'7	469	728
+'8	416	608
+'9	261	396
+'10	170	560
+11-15	925	1566
+16-20	391	985
+21-50	987	1845
+51-100	320	1232
+101-150	246	563
+151-200	0	195
+201-500	467	225
+501-1000	0	538
+'1001+	0	0
+
+Number of genes per-species in orthogroup	Percentage of genes	Percentage of genes
+'0	0.0	0.0
+'1	37.1	32.1
+'2	16.4	16.4
+'3	6.8	8.8
+'4	4.2	5.2
+'5	2.9	3.6
+'6	1.8	2.9
+'7	1.4	2.0
+'8	1.2	1.7
+'9	0.8	1.1
+'10	0.5	1.6
+11-15	2.7	4.4
+16-20	1.1	2.7
+21-50	2.9	5.1
+51-100	0.9	3.4
+101-150	0.7	1.6
+151-200	0.0	0.5
+201-500	1.4	0.6
+501-1000	0.0	1.5
+'1001+	0.0	0.0
