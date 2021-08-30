@@ -11,7 +11,7 @@ library(ggvenn)
 
 #Load count data
 #Your path to the files here:
-temp.path <- "~Data/"
+temp.path <- "~/Data/"
 
 pepper_count <- read.table(paste(temp.path, "pepper_count.txt", sep = ""), header=T)
 tomato_count <- read.table(paste(temp.path, "tomato_count.txt", sep = ""), header=T)
