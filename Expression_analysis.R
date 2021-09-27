@@ -13,8 +13,9 @@ library(ggvenn)
 #Your path to the files here:
 temp.path <- "./Count_data/"
 
-pepper_count <- read.table(paste(temp.path, "pepper_count.txt", sep = ""), header=T)
-tomato_count <- read.table(paste(temp.path, "tomato_count.txt", sep = ""), header=T)
+#Load and merge the both count datasets in a single list
+count_data <- list("pepper_count" = read.table(paste(temp.path, "pepper_count.txt", sep = ""), header=T),
+                   "tomato_count" = read.table(paste(temp.path, "tomato_count.txt", sep = ""), header=T))
 
 #Create metadata table
 metadata <- data.frame(stage = rep(c("S1","S2","MG","B"), each=3),
@@ -23,20 +24,16 @@ metadata <- data.frame(stage = rep(c("S1","S2","MG","B"), each=3),
 
 rownames(metadata) <- metadata$sample
 metadata$stage = factor(metadata$stage)
-all(colnames(pepper_count) == rownames(metadata))
-all(colnames(tomato_count) == rownames(metadata))
 
 #::::::::::::::::::::::::::::::::::::::::::::#
 #      DEG analysis for ALL the genes        #  
 #::::::::::::::::::::::::::::::::::::::::::::#
 
-#Merge the both count datasets in a single list
-count_data <- list("pepper_count" = pepper_count, "tomato_count" = tomato_count)
 names(count_data)
 for (i in names(count_data)) {
   #DESEq analysis
-    all(colnames(count_data[[i]]) == rownames(metadata))
-  
+      #DESEq analysis
+  if (all(colnames(count_data[[1]]) == rownames(metadata)) == T) {
     ddseq <- DESeqDataSetFromMatrix(countData= count_data[[i]], colData= metadata, 
                                     design = ~ stage)
     keep = rowSums(counts(ddseq)) >= 5
@@ -46,10 +43,15 @@ for (i in names(count_data)) {
     
     dds <- DESeq(ddseq)
     
-    assign(gsub("count","s1_s2",i) , as.data.frame(lfcShrink(dds, contrast= c("stage","S1","S2"))))
-    assign(gsub("count","s2_mg",i), as.data.frame(lfcShrink(dds, contrast = c("stage", "S2","MG"))))
-    assign(gsub("count","mg_b",i), as.data.frame(lfcShrink(dds, contrast = c("stage","MG","B"))))
+    res[[gsub("count","s1_s2",i)]] <- as.data.frame(lfcShrink(dds, contrast= c("stage","S1","S2")))
+    res[[gsub("count","s2_mg",i)]] <- as.data.frame(lfcShrink(dds, contrast = c("stage", "S2","MG")))
+    res[[gsub("count","mg_b",i)]] <- as.data.frame(lfcShrink(dds, contrast = c("stage","MG","B")))
 
+    } else {
+      stop()
+      print("Metadata sample column and colnames of count data don't have the same order")
+    }
+    
 }
 
 res <- list("pepper_s1_s2" =pepper_s1_s2, "pepper_s2_mg"=pepper_s2_mg, "pepper_mg_b"=pepper_mg_b,
@@ -97,30 +99,27 @@ ggarrange(pepper_s1_s2_ma, pepper_s2_mg_ma, pepper_mg_b_ma,
           ncol = 3, nrow = 2, labels = c("A","B","C","D","F"))
 
 #Intersection of DEG 
+res_sig <- list()
 for (i in contras) {
   for (j in c("pepper","tomato")) {
-   assign(paste(paste(j, i, sep = "_"), "sig", sep = "_"), res[[paste(j,i, sep = "_")]] %>% 
+   res_sig[[paste(paste(j, i, sep = "_"), "sig", sep = "_")]] <- res[[paste(j,i, sep = "_")]] %>% 
             dplyr::filter(abs(log2FoldChange) > 1 & padj < 0.01))
      
   }
 }
 
-res_sig <- list("pepper_s1_s2"=pepper_s1_s2_sig, "pepper_s2_mg"=pepper_s2_mg_sig, "pepper_mg_b"=pepper_mg_b_sig,
-                "tomato_s1_s2"=tomato_s1_s2_sig, "tomato_s2_mg"=tomato_s2_mg_sig, "tomato_mg_b"=tomato_mg_b_sig)
 #Create logical table
-venn_ortho_pepper <- tibble(pepper_count %>% rownames_to_column(., "ortho")) %>%
-  dplyr::select("ortho") %>%
-  dplyr::mutate(pepper_s1_s2= ortho %in% rownames(pepper_s1_s2_sig)) %>%
-  dplyr::mutate(pepper_s2_mg= ortho %in% rownames(pepper_s2_mg_sig)) %>%
-  dplyr::mutate(pepper_mg_b= ortho %in% rownames(pepper_mg_b_sig))
 
-venn_ortho_tomato <- tibble(tomato_count %>% rownames_to_column(., "ortho")) %>%
+for (i in c("pepper", "tomato")){
+  
+assign(
+  paste("venn_ortho",i, sep="_"),
+  tibble(count_data[[paste(i,"count", sep="_")]] %>% rownames_to_column(., "ortho")) %>%
   dplyr::select("ortho") %>%
-  dplyr::mutate(tomato_s1_s2= ortho %in% rownames(tomato_s1_s2_sig)) %>%
-  dplyr::mutate(tomato_s2_mg= ortho %in% rownames(tomato_s2_mg_sig)) %>%
-  dplyr::mutate(tomato_mg_b= ortho %in% rownames(tomato_mg_b_sig))
-
-names(res_sig)
+  dplyr::mutate(paste(i,"s1_s2", sep="_") = ortho %in% rownames(res_sig[[paste(paste(i, "s1_s2", sep = "_"), "sig", sep = "_")]]) %>%
+  dplyr::mutate(paste(i,"s2_mg", sep="_")= ortho %in% rownames(res_sig[[paste(paste(i, "s2_mg", sep = "_"), "sig", sep = "_")]]) %>%
+  dplyr::mutate(paste(i,"mg_b", sep="_")= ortho %in% rownames(res_sig[[paste(paste(i, "mg_b", sep = "_"), "sig", sep = "_")]])) 
+  )
 
 pepper_venn <- ggplot(venn_ortho_pepper) +
   geom_venn(aes(A = pepper_s1_s2, B = pepper_s2_mg, C= pepper_mg_b), 
@@ -165,8 +164,6 @@ ggarrange(pepper_venn, tomato_venn)
 pepper_count_ort <- read.table(paste(temp.path, "pepper_count_ort.txt", sep = ""), header=T) 
 tomato_count_ort <- read.table(paste(temp.path, "tomato_count_ort.txt", sep = ""), header=T)
 
-all(colnames(pepper_count_ort) == rownames(metadata))
-all(colnames(tomato_count_ort) == rownames(metadata))
 
 #::::::::::::::::::::::::::::::::::::::::::::#
 #      DEG analysis for ALL the genes        #  
@@ -175,10 +172,11 @@ all(colnames(tomato_count_ort) == rownames(metadata))
 #Merge the both count datasets in a single list
 count_data <- list("pepper_count" = pepper_count_ort, "tomato_count" = tomato_count_ort)
 names(count_data)
+
+res<- list()
 for (i in names(count_data)) {
-  #DESEq analysis
-  all(colnames(count_data[[i]]) == rownames(metadata))
-  
+      #DESEq analysis
+  if (all(colnames(count_data[[1]]) == rownames(metadata)) == T) {
   ddseq <- DESeqDataSetFromMatrix(countData= count_data[[i]], colData= metadata, 
                                   design = ~ stage)
   keep = rowSums(counts(ddseq)) >= 5
@@ -188,14 +186,16 @@ for (i in names(count_data)) {
   
   dds <- DESeq(ddseq)
   
-  assign(gsub("count","s1_s2_ort",i) , as.data.frame(lfcShrink(dds, contrast= c("stage","S1","S2"))))
-  assign(gsub("count","s2_mg_ort",i), as.data.frame(lfcShrink(dds, contrast = c("stage", "S2","MG"))))
-  assign(gsub("count","mg_b_ort",i), as.data.frame(lfcShrink(dds, contrast = c("stage","MG","B"))))
+  res[[gsub("count","s1_s2_ort",i)]] <- as.data.frame(lfcShrink(dds, contrast= c("stage","S1","S2")))
+  res[[gsub("count","s2_mg_ort",i)]] <- as.data.frame(lfcShrink(dds, contrast = c("stage", "S2","MG")))
+  res[[gsub("count","mg_b_ort",i)]] <- as.data.frame(lfcShrink(dds, contrast = c("stage","MG","B")))
   
+    } else {
+      stop()
+      print("Metadata sample columns and colnames of count data don't have the same order")
+    }
 }
 
-res <- list("pepper_s1_s2" =pepper_s1_s2_ort, "pepper_s2_mg"=pepper_s2_mg_ort, "pepper_mg_b"=pepper_mg_b_ort,
-            "tomato_s1_s2" =tomato_s1_s2_ort, "tomato_s2_mg"=tomato_s2_mg_ort, "tomato_mg_b"=tomato_mg_b_ort)
 
 #How many significant (abs LFC > 1 and p adjusted < 0.1) DEG are in each contrast?
 for (i in c("pepper","tomato")) {
